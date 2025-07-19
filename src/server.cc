@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
                           (socklen_t *)&client_addr_len);
   std::cout << "Client connected\n";
 
-  std::string res{"PONG\r\n"};
+  std::string res{"+PONG\r\n"};
 
   write(client_fd, res.data(), res.size());
 
