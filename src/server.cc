@@ -2,8 +2,9 @@
 #include "asio.hpp"
 #include "parser.hpp"
 #include "spdlog/spdlog.h"
-#include <algorithm>
 #include <arpa/inet.h>
+#include <asio/error.hpp>
+#include <asio/error_code.hpp>
 #include <cstddef>
 #include <iostream>
 #include <memory>
@@ -35,7 +36,7 @@ void Session::session_read() {
         if (!err) {
           std::string raw_data(data_, data_ + length);
           auto parsed = parse_request(raw_data);
-          spdlog::info("Found {} commands", parsed.size());
+          spdlog::debug("Found {} commands", parsed.size());
           for (const auto &command : parsed) {
             auto result = command.get()->serve();
             auto bytes = result.get()->to_bytes();
@@ -43,7 +44,17 @@ void Session::session_read() {
           }
           session_write(response_.size());
         } else {
-          spdlog::error("Error when reading from buffer: {}", err.message());
+          if (err == asio::error::eof) {
+            return;
+          }
+          if (err == asio::error::operation_aborted) {
+            spdlog::error(
+                "Operation aborted when attempting to read from buffer: {}",
+                err.message());
+            return;
+          } else {
+            spdlog::error("Error when reading from buffer: {}", err.message());
+          }
         }
       });
 };
@@ -51,13 +62,12 @@ void Session::session_read() {
 void Session::session_write(std::size_t length) {
   auto self(shared_from_this());
   asio::async_write(socket_, asio::buffer(response_, length),
-                    [this, self](std::error_code err, std::size_t l) {
+                    [this, self](asio::error_code err, std::size_t l) {
                       if (!err) {
                         spdlog::info("Wrote {} bytes", l);
                         response_.clear();
                         session_read();
                       }
-                      spdlog::error("Error when writing to buffer");
                     });
 };
 

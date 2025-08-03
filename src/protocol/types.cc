@@ -1,10 +1,25 @@
 #include "types.hpp"
+#include <spdlog/spdlog.h>
+#include <string>
 #include <vector>
 
 namespace types {
 std::vector<char> types::SimpleString::to_bytes() const {
   std::vector<char> result;
   result.push_back('+');
+  result.insert(result.end(), data_.begin(), data_.end());
+  result.push_back('\r');
+  result.push_back('\n');
+  return result;
+}
+
+std::vector<char> types::BulkString::to_bytes() const {
+  std::vector<char> result;
+  result.push_back('$');
+  auto len = std::to_string(data_.length());
+  result.insert(result.end(), len.begin(), len.end());
+  result.push_back('\r');
+  result.push_back('\n');
   result.insert(result.end(), data_.begin(), data_.end());
   result.push_back('\r');
   result.push_back('\n');

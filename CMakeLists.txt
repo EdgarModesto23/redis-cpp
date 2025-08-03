@@ -24,3 +24,5 @@ target_link_libraries(server PRIVATE Threads::Threads)
 target_link_libraries(server PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(server PRIVATE resp_types)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")

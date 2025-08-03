@@ -25,6 +25,15 @@ private:
   std::string command_;
 };
 
+class Echo : public AbstractCommand {
+public:
+  std::unique_ptr<types::RESPType> serve() const override;
+  Echo(std::string message);
+
+private:
+  std::string message_;
+};
+
 template <typename T> class ParseRequestError : public AbstractCommand {
 public:
   std::unique_ptr<types::RESPType> serve() const override;

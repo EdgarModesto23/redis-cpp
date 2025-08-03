@@ -37,7 +37,7 @@ std::vector<std::unique_ptr<AbstractCommand>>
 parse_request(const std::string &data) {
   std::vector<std::unique_ptr<AbstractCommand>> commands;
   std::istringstream stream(data);
-  spdlog::info("Data to parse: {}", data);
+  spdlog::debug("Data to parse: {}", data);
   // Parse Array: starts with '*'
   while (stream.peek() != EOF) {
     if (stream.get() != '*') {
@@ -82,7 +82,9 @@ parse_request(const std::string &data) {
     std::transform(cmd.begin(), cmd.end(), cmd.begin(),
                    [](unsigned char c) { return std::toupper(c); });
 
-    if (cmd == "PING") {
+    if (cmd == "ECHO") {
+      commands.emplace_back(std::make_unique<Echo>(tokens[1]));
+    } else if (cmd == "PING") {
       commands.emplace_back(std::make_unique<Ping>());
     } else {
       commands.emplace_back(std::make_unique<UnknownCommand>(cmd));

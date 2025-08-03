@@ -19,7 +19,7 @@ private:
 
 public:
   std::vector<char> to_bytes() const override;
-  ErrorString(std::string data, ERROR_TYPE type) : data_(data), type_(type) {};
+  ErrorString(std::string data, ERROR_TYPE type) : data_(data), type_(type) {}
 };
 
 class SimpleString : public RESPType {
@@ -28,6 +28,16 @@ private:
 
 public:
   std::vector<char> to_bytes() const override;
-  SimpleString(std::string data) : data_(data) {};
+  SimpleString(std::string data) : data_(data) {}
 };
+
+class BulkString : public RESPType {
+private:
+  std::string data_;
+
+public:
+  std::vector<char> to_bytes() const override;
+  BulkString(std::string data) : data_(data) {}
+};
+
 } // namespace types

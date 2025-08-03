@@ -5,9 +5,12 @@
 #include <string>
 
 namespace commands {
+
 std::unique_ptr<types::RESPType> commands::Ping::serve() const {
-  return std::make_unique<types::SimpleString>(types::SimpleString("PONG"));
+  return std::make_unique<types::SimpleString>("PONG");
 }
+
+commands::Ping::Ping() {};
 
 std::unique_ptr<types::RESPType> commands::UnknownCommand::serve() const {
   return std::make_unique<types::ErrorString>(
@@ -16,8 +19,6 @@ std::unique_ptr<types::RESPType> commands::UnknownCommand::serve() const {
 
 commands::UnknownCommand::UnknownCommand(std::string command)
     : command_(command) {};
-
-commands::Ping::Ping() {};
 
 template <typename T>
 commands::ParseRequestError<T>::ParseRequestError(T err) : error_(err){};
@@ -32,5 +33,11 @@ commands::ParseRequestError<char>::serve() const {
 
 template <>
 commands::ParseRequestError<char>::ParseRequestError(char err) : error_(err){};
+
+commands::Echo::Echo(std::string message) : message_(message) {};
+
+std::unique_ptr<types::RESPType> commands::Echo::serve() const {
+  return std::make_unique<types::BulkString>(types::BulkString(message_));
+}
 
 } // namespace commands
