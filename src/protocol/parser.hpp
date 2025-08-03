@@ -1,9 +1,13 @@
 #pragma once
 
 #include "command.hpp"
+#include <memory.h>
 #include <string>
 #include <vector>
 
-std::vector<std::string> split (const std::string &s, char delim);
+using namespace commands;
 
-std::vector<std::vector<AbstractCommand>> parse_request(const char* data);
+namespace parser {
+std::vector<std::unique_ptr<AbstractCommand>>
+parse_request(const std::string &data);
+} // namespace parser
