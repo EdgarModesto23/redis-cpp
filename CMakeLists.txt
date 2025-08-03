@@ -10,8 +10,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Threads REQUIRED)
 find_package(asio CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 add_executable(server ${SOURCE_FILES})
 
 target_link_libraries(server PRIVATE asio asio::asio)
 target_link_libraries(server PRIVATE Threads::Threads)
+target_link_libraries(server PRIVATE spdlog::spdlog_header_only)
+target_link_libraries(server PRIVATE resp_types)
+
+add_subdirectory(src/protocol)
