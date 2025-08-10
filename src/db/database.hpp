@@ -34,7 +34,7 @@ public:
 
     auto timer = std::make_shared<asio::steady_timer>(
         io_, std::chrono::milliseconds(milis));
-    timer->async_wait([this, key, timer](const asio::error_code &err) {
+    timer->async_wait([this, key, timer](const std::error_code &err) {
       if (!err) {
         auto it = data_.find(key);
         if (it != data_.end()) {
