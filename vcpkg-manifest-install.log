@@ -22,4 +22,4 @@ The package spdlog provides CMake targets:
     find_package(spdlog CONFIG REQUIRED)
     target_link_libraries(main PRIVATE spdlog::spdlog_header_only)
 
-All requested installations completed successfully in: 52.8 us
+All requested installations completed successfully in: 52.4 us
