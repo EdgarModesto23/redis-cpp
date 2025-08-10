@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "asio.hpp"
+#include "database.hpp"
 #include "parser.hpp"
 #include "spdlog/spdlog.h"
 #include <arpa/inet.h>
@@ -21,10 +22,11 @@ using asio::ip::tcp;
 
 using namespace parser;
 
-Session::Session(tcp::socket socket) : socket_(std::move(socket)) {};
+Session::Session(tcp::socket socket, Database &db)
+    : socket_(std::move(socket)), db_(db) {};
 
-Server::Server(asio::io_context &ctx, short port)
-    : acceptor_(ctx, tcp::endpoint(tcp::v4(), port)) {
+Server::Server(asio::io_context &ctx, short port, Database db)
+    : acceptor_(ctx, tcp::endpoint(tcp::v4(), port)), db_(db) {
   accept();
 };
 
@@ -35,7 +37,7 @@ void Session::session_read() {
       [this, self](std::error_code err, std::size_t length) {
         if (!err) {
           std::string raw_data(data_, data_ + length);
-          auto parsed = parse_request(raw_data);
+          auto parsed = parse_request(raw_data, self->db_);
           spdlog::debug("Found {} commands", parsed.size());
           for (const auto &command : parsed) {
             auto result = command.get()->serve();
@@ -79,7 +81,7 @@ void Session::serve() {
 void Server::accept() {
   acceptor_.async_accept([this](std::error_code err, tcp::socket socket) {
     if (!err) {
-      std::make_shared<Session>(std::move(socket))->serve();
+      std::make_shared<Session>(std::move(socket), db_)->serve();
     }
     accept();
   });
@@ -103,7 +105,9 @@ $$$$$$$$\$$$$$$$ |\$$$$$$$ |\$$$$$$$ |$$ |
 
     asio::io_context io_context;
 
-    Server s(io_context, 6379);
+    Database db{io_context};
+
+    Server s(io_context, 6379, db);
 
     io_context.run();
   } catch (std::exception &e) {

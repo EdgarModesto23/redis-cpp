@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "command.hpp"
+#include "errors.hpp"
 #include "spdlog/spdlog.h"
 #include <memory>
 #include <sstream>
@@ -34,7 +35,7 @@ static std::optional<std::string> parse_bulk_string(std::istream &stream) {
 }
 
 std::vector<std::unique_ptr<AbstractCommand>>
-parse_request(const std::string &data) {
+parse_request(const std::string &data, Database &db) {
   std::vector<std::unique_ptr<AbstractCommand>> commands;
   std::istringstream stream(data);
   spdlog::debug("Data to parse: {}", data);
@@ -87,10 +88,13 @@ parse_request(const std::string &data) {
     } else if (cmd == "PING") {
       commands.emplace_back(std::make_unique<Ping>());
     } else if (cmd == "SET") {
-      spdlog::debug("tokens to be used: {}, {}", tokens[1], tokens[2]);
-      commands.emplace_back(std::make_unique<Set>(tokens[1], tokens[2]));
+      try {
+        commands.emplace_back(std::make_unique<Set>(Set::New(tokens, db)));
+      } catch (const SyntaxError &err) {
+        commands.emplace_back(std::make_unique<ErrorCommand>(err.what()));
+      }
     } else if (cmd == "GET") {
-      commands.emplace_back(std::make_unique<Get>(tokens[1]));
+      commands.emplace_back(std::make_unique<Get>(tokens[1], db));
     } else {
       commands.emplace_back(std::make_unique<UnknownCommand>(cmd));
     }

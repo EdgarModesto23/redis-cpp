@@ -17,9 +17,10 @@ private:
   enum { max_length = 1024 };
   char data_[max_length];
   std::vector<char> response_;
+  Database &db_;
 
 public:
-  Session(tcp::socket socket);
+  Session(tcp::socket socket, Database &db);
   void serve();
 };
 
@@ -27,9 +28,10 @@ class Server {
 private:
   void accept();
   tcp::acceptor acceptor_;
+  Database db_;
 
 public:
-  Server(asio::io_context &ctx, short port);
+  Server(asio::io_context &ctx, short port, Database db);
 };
 
 int init_server();

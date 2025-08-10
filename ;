@@ -18,21 +18,16 @@ std::vector<char> types::BulkString::to_bytes() const {
   result.push_back('$');
 
   auto data_len = data_.length();
-  if (data_len == 0) {
-    result.push_back('-');
-    result.push_back('1');
-    result.push_back('\r');
-    result.push_back('\n');
-    return result;
-  }
-
-  auto len = std::to_string(data_.length());
+  auto len = std::to_string(data_len > 0 ? data_.length() : -1);
+  spdlog::debug(len);
   result.insert(result.end(), len.begin(), len.end());
   result.push_back('\r');
   result.push_back('\n');
-  result.insert(result.end(), data_.begin(), data_.end());
-  result.push_back('\r');
-  result.push_back('\n');
+  if (data_len > 0) {
+    result.insert(result.end(), data_.begin(), data_.end());
+    result.push_back('\r');
+    result.push_back('\n');
+  }
   return result;
 }
 

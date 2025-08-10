@@ -1,6 +1,8 @@
 #include "command.hpp"
 #include "database.hpp"
+#include "errors.hpp"
 #include "types.hpp"
+#include <cstdlib>
 #include <format>
 #include <memory>
 #include <string>
@@ -42,13 +44,34 @@ std::unique_ptr<types::RESPType> commands::Echo::serve() const {
 }
 
 std::unique_ptr<types::RESPType> commands::Set::serve() const {
-  db.add(key_, val_);
-  return std::make_unique<types::SimpleString>("OK");
+  if (is_expiry_) {
+    db_.add_expiry(key_, val_, expiry_time_);
+    return std::make_unique<types::SimpleString>("OK");
+  } else {
+    db_.add(key_, val_);
+    return std::make_unique<types::SimpleString>("OK");
+  }
 }
 
+Set commands::Set::New(const std::vector<std::string> &args, Database &db) {
+  switch (args.size()) {
+  case 3:
+    return Set(args[1], args[2], db);
+  case 5:
+    return Set(args[1], args[2], atoi(args[4].data()), db);
+
+  default:
+    throw SyntaxError("syntax error");
+  };
+};
+
 std::unique_ptr<types::RESPType> commands::Get::serve() const {
-  auto value = db.get<std::string>(key_);
+  auto value = db_.get<std::string>(key_);
   return std::make_unique<types::BulkString>(value);
+}
+
+std::unique_ptr<types::RESPType> commands::ErrorCommand::serve() const {
+  return std::make_unique<types::ErrorString>(message_, types::ERR);
 }
 
 } // namespace commands

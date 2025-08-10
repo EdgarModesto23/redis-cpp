@@ -3,6 +3,7 @@
 #include "types.hpp"
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace commands {
 class AbstractCommand {
@@ -48,20 +49,40 @@ class Set : public AbstractCommand {
 public:
   std::unique_ptr<types::RESPType> serve() const override;
 
-  Set(std::string key, std::string val) : key_(key), val_(val) {}
+  Set(std::string key, std::string val, Database &db)
+      : key_(key), val_(val), is_expiry_(false), expiry_time_(0), db_(db) {}
+
+  Set(std::string key, std::string val, int expiry, Database &db)
+      : key_(key), val_(val), is_expiry_(true), expiry_time_(expiry), db_(db) {}
+
+  static Set New(const std::vector<std::string> &args, Database &db);
 
 private:
   std::string key_;
   std::string val_;
+  bool is_expiry_;
+  int expiry_time_;
+  Database &db_;
 };
 
 class Get : public AbstractCommand {
 public:
   std::unique_ptr<types::RESPType> serve() const override;
-  Get(std::string key) : key_(key) {}
+  Get(std::string key, Database &db) : key_(key), db_(db) {}
 
 private:
+  Database &db_;
   std::string key_;
+};
+
+class ErrorCommand : public AbstractCommand {
+public:
+  std::unique_ptr<types::RESPType> serve() const override;
+
+  ErrorCommand(const std::string &message) : message_(message) {}
+
+private:
+  std::string message_;
 };
 
 } // namespace commands
