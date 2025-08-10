@@ -1,4 +1,5 @@
 #pragma once
+#include "database.hpp"
 #include "types.hpp"
 #include <memory>
 #include <string>
@@ -42,4 +43,25 @@ public:
 private:
   T error_;
 };
+
+class Set : public AbstractCommand {
+public:
+  std::unique_ptr<types::RESPType> serve() const override;
+
+  Set(std::string key, std::string val) : key_(key), val_(val) {}
+
+private:
+  std::string key_;
+  std::string val_;
+};
+
+class Get : public AbstractCommand {
+public:
+  std::unique_ptr<types::RESPType> serve() const override;
+  Get(std::string key) : key_(key) {}
+
+private:
+  std::string key_;
+};
+
 } // namespace commands

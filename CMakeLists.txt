@@ -11,6 +11,7 @@ find_package(asio CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 add_subdirectory(src/protocol)
+add_subdirectory(src/db)
 
 set(SERVER_SOURCES
   src/main.cc

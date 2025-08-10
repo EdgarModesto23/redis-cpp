@@ -86,6 +86,11 @@ parse_request(const std::string &data) {
       commands.emplace_back(std::make_unique<Echo>(tokens[1]));
     } else if (cmd == "PING") {
       commands.emplace_back(std::make_unique<Ping>());
+    } else if (cmd == "SET") {
+      spdlog::debug("tokens to be used: {}, {}", tokens[1], tokens[2]);
+      commands.emplace_back(std::make_unique<Set>(tokens[1], tokens[2]));
+    } else if (cmd == "GET") {
+      commands.emplace_back(std::make_unique<Get>(tokens[1]));
     } else {
       commands.emplace_back(std::make_unique<UnknownCommand>(cmd));
     }

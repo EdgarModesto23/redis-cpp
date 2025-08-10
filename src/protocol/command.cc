@@ -1,4 +1,5 @@
 #include "command.hpp"
+#include "database.hpp"
 #include "types.hpp"
 #include <format>
 #include <memory>
@@ -38,6 +39,16 @@ commands::Echo::Echo(std::string message) : message_(message) {};
 
 std::unique_ptr<types::RESPType> commands::Echo::serve() const {
   return std::make_unique<types::BulkString>(types::BulkString(message_));
+}
+
+std::unique_ptr<types::RESPType> commands::Set::serve() const {
+  db.add(key_, val_);
+  return std::make_unique<types::SimpleString>("OK");
+}
+
+std::unique_ptr<types::RESPType> commands::Get::serve() const {
+  auto value = db.get<std::string>(key_);
+  return std::make_unique<types::BulkString>(value);
 }
 
 } // namespace commands
